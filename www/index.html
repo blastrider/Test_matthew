@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Nginx • Landing</title>
+  <meta name="description" content="Landing page moderne servie par Nginx sur Debian Bookworm (Vagrant)." />
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <a class="brand" href="#">
+        <span class="logo" aria-hidden="true"></span>
+        <div>
+          <b>Nginx • Bookworm</b><br/>
+          <span class="muted-label">Landing page de test</span>
+        </div>
+      </a>
+      <span class="pill"><span class="dot" aria-hidden="true"></span> Service OK • Port <code>8080</code></span>
+    </header>
+
+    <section class="hero">
+      <div class="panel">
+        <h1>Votre Nginx est en ligne.<br/>Propre. Rapide. Bleu nuit.</h1>
+        <p class="lead">
+          Déployé via Vagrant sur Debian Bookworm, avec une page statique moderne.
+          Idéal pour valider le réseau, le provisioning et la chaîne d’intégration.
+        </p>
+
+        <div class="cta">
+          <a class="btn primary" href="/" aria-label="Recharger la page">
+            Recharger <span class="arrow">→</span>
+          </a>
+          <a class="btn" href="/nginx_status" data-action="status" title="Endpoint optionnel">
+            Status (optionnel)
+          </a>
+          <a class="btn" href="https://nginx.org/" target="_blank" rel="noopener noreferrer">
+            Docs Nginx
+          </a>
+        </div>
+
+        <div class="grid" aria-label="Fonctionnalités">
+          <div class="card">
+            <b>Provisioning idempotent</b>
+            <p>Install, enable, test config, reload. Simple et stable.</p>
+          </div>
+          <div class="card">
+            <b>Design sombre</b>
+            <p>Dominante bleu nuit, accents néon, responsive natif.</p>
+          </div>
+          <div class="card">
+            <b>Prêt à étendre</b>
+            <p>Ajoute un vhost, TLS, reverse proxy, ou un build CI.</p>
+          </div>
+        </div>
+      </div>
+
+      <aside class="side">
+        <div class="kpi">
+          <div class="badge">✓ Déploiement réussi</div>
+          <h2>Infos runtime</h2>
+          <div class="stat">
+            <div class="label">OS</div>
+            <div class="value">Debian Bookworm</div>
+          </div>
+          <div class="stat">
+            <div class="label">Serveur</div>
+            <div class="value">Nginx</div>
+          </div>
+          <div class="stat">
+            <div class="label">Accès</div>
+            <div class="value"><code>http://localhost:8080</code></div>
+          </div>
+        </div>
+
+        <div class="kpi">
+          <h2>À faire ensuite</h2>
+          <div class="stat">
+            <div class="label">Reverse proxy</div>
+            <div class="value">App → 127.0.0.1:3000</div>
+          </div>
+          <div class="stat">
+            <div class="label">TLS</div>
+            <div class="value">mkcert / ACME</div>
+          </div>
+          <div class="stat">
+            <div class="label">Hardening</div>
+            <div class="value">Headers / CSP</div>
+          </div>
+        </div>
+      </aside>
+    </section>
+
+    <footer>
+      <div>Served by <b>Nginx</b> • Vagrant • Debian Bookworm</div>
+      <div>Astuce: remappe le port host si besoin (ex: 8081)</div>
+    </footer>
+  </div>
+  <script src="assets/js/main.js" defer></script>
+</body>
+</html>
