@@ -97,6 +97,25 @@
       <div>Astuce: remappe le port host si besoin (ex: 8081)</div>
     </footer>
   </div>
+  <div class="modal" id="status-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="status-title">
+    <div class="modal-backdrop" data-action="status-close" aria-hidden="true"></div>
+    <div class="modal-card" role="document">
+      <div class="modal-head">
+        <h2 id="status-title">Statut Nginx</h2>
+        <button class="modal-close" type="button" data-action="status-close">Fermer</button>
+      </div>
+      <div class="modal-body">
+        <div class="status-block">
+          <h3>Statut</h3>
+          <pre class="status-pre" data-status="text">Chargement...</pre>
+        </div>
+        <div class="status-block">
+          <h3>Logs (20 derniers)</h3>
+          <pre class="status-pre" data-status="logs">Chargement...</pre>
+        </div>
+      </div>
+    </div>
+  </div>
   <script src="assets/js/main.js" defer></script>
 </body>
 </html>

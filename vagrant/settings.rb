@@ -13,7 +13,7 @@ module Settings
     config.vm.provider "virtualbox" do |vb|
       vb.name = "nginx-bookworm"
       vb.memory = 1024
-      vb.cpus = 2
+      vb.cpus = 4
     end
   end
 end
