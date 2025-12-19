@@ -163,6 +163,131 @@ h1{
 .card b{display:block; margin-bottom:6px}
 .card p{margin:0; color:var(--muted); font-size:13.5px; line-height:1.45}
 
+.uploader{
+  margin-top:22px;
+}
+.uploader-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:14px;
+}
+.uploader-head h2{
+  margin:0 0 6px;
+  font-size:18px;
+}
+.uploader-note{
+  margin:0;
+  color:var(--muted);
+  font-size:13.5px;
+}
+.dropzone{
+  position:relative;
+  border-radius:16px;
+  border:1px dashed rgba(255,255,255,.28);
+  background: rgba(255,255,255,.04);
+  padding:18px;
+  transition: border-color .12s ease, background .12s ease, transform .12s ease;
+}
+.dropzone.is-drag{
+  border-color: rgba(77,163,255,.6);
+  background: rgba(77,163,255,.08);
+  transform: translateY(-1px);
+}
+.dropzone-input{
+  position:absolute;
+  inset:0;
+  opacity:0;
+  cursor:pointer;
+}
+.dropzone-label{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  text-align:center;
+  color:var(--text);
+  pointer-events:none;
+}
+.dropzone-title{
+  font-weight:600;
+  font-size:15px;
+}
+.dropzone-sub{
+  color:var(--muted);
+  font-size:13px;
+}
+.file-list{
+  margin-top:16px;
+}
+.file-empty{
+  margin:0;
+  color:var(--muted);
+  font-size:13px;
+}
+.file-items{
+  list-style:none;
+  margin:0;
+  padding:0;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.file-item{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:10px 12px;
+  border-radius:12px;
+  border:1px solid var(--stroke);
+  background: rgba(255,255,255,.04);
+}
+.file-info{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+}
+.file-name{
+  font-weight:600;
+  font-size:13.5px;
+}
+.file-meta{
+  color:var(--muted);
+  font-size:12px;
+}
+.file-actions{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.file-link{
+  text-decoration:none;
+  color:var(--text);
+  border:1px solid var(--stroke);
+  padding:6px 10px;
+  border-radius:10px;
+  font-size:12.5px;
+  background:rgba(255,255,255,.04);
+}
+.file-link:hover{
+  background:rgba(255,255,255,.09);
+  border-color:rgba(255,255,255,.18);
+}
+.file-remove{
+  border:1px solid rgba(255,255,255,.18);
+  background:rgba(255,255,255,.02);
+  color:var(--muted);
+  padding:6px 10px;
+  border-radius:10px;
+  font-size:12.5px;
+  cursor:pointer;
+}
+.file-remove:hover{
+  color:var(--text);
+  background:rgba(255,255,255,.08);
+}
+
 .side{
   display:flex;
   flex-direction:column;

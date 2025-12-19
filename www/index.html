@@ -92,6 +92,26 @@
       </aside>
     </section>
 
+    <section class="panel uploader" aria-labelledby="uploader-title">
+      <div class="uploader-head">
+        <div>
+          <h2 id="uploader-title">Importer des PDFs</h2>
+          <p class="uploader-note">Les fichiers restent sur votre appareil (pas d'upload serveur).</p>
+        </div>
+        <span class="badge">PDF uniquement</span>
+      </div>
+      <div class="dropzone" data-dropzone>
+        <input id="pdf-input" class="dropzone-input" type="file" accept="application/pdf" multiple />
+        <label class="dropzone-label" for="pdf-input">
+          <span class="dropzone-title">Glissez-déposez vos PDFs ici</span>
+          <span class="dropzone-sub">ou cliquez pour sélectionner des fichiers</span>
+        </label>
+      </div>
+      <div class="file-list" data-file-list>
+        <p class="file-empty">Aucun fichier sélectionné.</p>
+      </div>
+    </section>
+
     <footer>
       <div>Served by <b>Nginx</b> • Vagrant • Debian Bookworm</div>
       <div>Astuce: remappe le port host si besoin (ex: 8081)</div>
