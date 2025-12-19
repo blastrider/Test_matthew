@@ -2,27 +2,55 @@
 - name: Provision Nginx landing page
   hosts: all
   become: true
+  vars:
+    node_role: nginx
+    nfs_server_ip: 192.168.56.12
+    nfs_allowed_subnet: 192.168.56.0/24
+    nfs_export_path: /var/www/html/upload
   tasks:
-    - name: Install required packages
+    - name: Install base packages
+      apt:
+        name:
+          - ca-certificates
+        state: present
+        update_cache: true
+
+    - name: Install nginx stack packages
       apt:
         name:
           - nginx
-          - ca-certificates
           - php8.2-fpm
+          - nfs-common
         state: present
-        update_cache: true
+      when: node_role == "nginx"
+
+    - name: Install storage packages
+      apt:
+        name:
+          - nfs-kernel-server
+        state: present
+      when: node_role == "storage"
 
     - name: Ensure php-fpm is enabled and running
       service:
         name: php8.2-fpm
         state: started
         enabled: true
+      when: node_role == "nginx"
 
     - name: Ensure nginx is enabled and running
       service:
         name: nginx
         state: started
         enabled: true
+      when: node_role == "nginx"
+
+    - name: Ensure nfs-kernel-server is enabled and running
+      service:
+        name: nfs-kernel-server
+        state: started
+        enabled: true
+      when: node_role == "storage"
 
     - name: Ensure asset directories exist
       file:
@@ -35,15 +63,59 @@
         - /var/www/html/assets/css
         - /var/www/html/assets/js
         - /var/www/html/_logs
-        - /var/www/html/uploads
+      when: node_role == "nginx"
 
-    - name: Ensure upload directory is writable by php-fpm
+    - name: Check if upload path is already mounted
+      set_fact:
+        upload_is_mounted: "{{ (ansible_mounts | selectattr('mount', 'equalto', nfs_export_path) | list | length) > 0 }}"
+      when: node_role == "nginx"
+
+    - name: Ensure upload mount point exists
       file:
-        path: /var/www/html/uploads
+        path: "{{ nfs_export_path }}"
+        state: directory
+      when: node_role == "nginx" and not (upload_is_mounted | default(false))
+
+    - name: Mount NFS upload share
+      mount:
+        path: "{{ nfs_export_path }}"
+        src: "{{ nfs_server_ip }}:{{ nfs_export_path }}"
+        fstype: nfs
+        opts: "rw,sync,hard"
+        state: mounted
+      register: mount_result
+      retries: 5
+      delay: 5
+      until: mount_result is succeeded
+      when: node_role == "nginx" and nfs_server_ip is defined
+
+    - name: Ensure upload export directory exists
+      file:
+        path: "{{ nfs_export_path }}"
         state: directory
         owner: www-data
         group: www-data
         mode: "0775"
+      when: node_role == "storage"
+
+    - name: Ensure exports.d directory exists
+      file:
+        path: /etc/exports.d
+        state: directory
+        owner: root
+        group: root
+        mode: "0755"
+      when: node_role == "storage"
+
+    - name: Configure NFS exports
+      copy:
+        dest: /etc/exports.d/upload.exports
+        owner: root
+        group: root
+        mode: "0644"
+        content: "{{ nfs_export_path }} {{ nfs_allowed_subnet }}(rw,sync,no_subtree_check)"
+      notify: Reload nfs exports
+      when: node_role == "storage"
 
     - name: Install site content
       copy:
@@ -61,6 +133,7 @@
           dest: /var/www/html/assets/js/main.js
         - src: /vagrant/www/upload.php
           dest: /var/www/html/upload.php
+      when: node_role == "nginx"
 
     - name: Set PHP upload limits
       copy:
@@ -73,6 +146,7 @@
           post_max_size = 10M
           memory_limit = 128M
       notify: Restart php-fpm
+      when: node_role == "nginx"
 
     - name: Install nginx site config
       copy:
@@ -82,6 +156,7 @@
         group: root
         mode: "0644"
       notify: Reload nginx
+      when: node_role == "nginx"
 
     - name: Ensure nginx status log exists
       file:
@@ -90,10 +165,12 @@
         owner: root
         group: root
         mode: "0644"
+      when: node_role == "nginx"
 
     - name: Validate nginx config
       command: nginx -t
       changed_when: false
+      when: node_role == "nginx"
 
   handlers:
     - name: Reload nginx
@@ -104,3 +181,5 @@
       service:
         name: php8.2-fpm
         state: restarted
+    - name: Reload nfs exports
+      command: exportfs -ra

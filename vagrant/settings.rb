@@ -1,13 +1,16 @@
 # vagrant/settings.rb
 module Settings
-  def self.apply(config, hostname: "nginx-bookworm", host_port: 8080)
+  def self.apply(config, hostname: "nginx-bookworm", host_port: 8080, private_ip: nil)
     config.vm.box = "debian/bookworm64"
     config.vm.hostname = hostname
 
     # Réseau
-    config.vm.network "forwarded_port", guest: 80, host: host_port, auto_correct: true
-    # Optionnel : IP privée
-    # config.vm.network "private_network", ip: "192.168.56.10"
+    if host_port
+      config.vm.network "forwarded_port", guest: 80, host: host_port, auto_correct: true
+    end
+    if private_ip
+      config.vm.network "private_network", ip: private_ip
+    end
 
     # Provider
     config.vm.provider "virtualbox" do |vb|

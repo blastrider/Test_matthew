@@ -213,7 +213,8 @@
         uploadFile(item)
           .then(function (data) {
             item.status = "done";
-            item.serverUrl = data.url ? new URL(data.url, window.location.origin).toString() : "";
+            var listUrl = data.list_url || "/upload/";
+            item.serverUrl = new URL(listUrl, window.location.origin).toString();
           })
           .catch(function (error) {
             item.status = "error";
