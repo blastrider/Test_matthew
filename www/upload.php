@@ -85,8 +85,17 @@ if (!move_uploaded_file($file['tmp_name'], $targetPath)) {
     exit;
 }
 
+$host = $_SERVER['HTTP_HOST'] ?? ($_SERVER['SERVER_NAME'] ?? 'localhost');
+$scheme = 'http';
+if (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') {
+    $scheme = 'https';
+} elseif (!empty($_SERVER['HTTP_X_FORWARDED_PROTO'])) {
+    $scheme = $_SERVER['HTTP_X_FORWARDED_PROTO'];
+}
+$baseUrl = $scheme . '://' . $host;
+
 echo json_encode([
     'ok' => true,
     'filename' => $targetName,
-    'url' => '/uploads/' . $targetName,
+    'url' => $baseUrl . '/uploads/' . $targetName,
 ]);

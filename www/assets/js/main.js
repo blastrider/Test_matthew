@@ -162,7 +162,9 @@
       var payload = new FormData();
       payload.append("pdf", item.file, item.file.name);
 
-      return fetch("/upload", {
+      var uploadUrl = window.location.origin + "/upload";
+
+      return fetch(uploadUrl, {
         method: "POST",
         body: payload,
       }).then(function (response) {
@@ -211,7 +213,7 @@
         uploadFile(item)
           .then(function (data) {
             item.status = "done";
-            item.serverUrl = data.url || "";
+            item.serverUrl = data.url ? new URL(data.url, window.location.origin).toString() : "";
           })
           .catch(function (error) {
             item.status = "error";
