@@ -1,9 +1,9 @@
 # vagrant/provision.rb
 module Provision
   def self.apply(config)
-    root = File.expand_path("..", __dir__)
-    script = File.join(root, "provision", "nginx.sh")
-
-    config.vm.provision "shell", path: script
+    config.vm.provision "ansible_local" do |ansible|
+      ansible.playbook = "ansible/playbook.yml"
+      ansible.become = true
+    end
   end
 end

@@ -1,0 +1,72 @@
+---
+- name: Provision Nginx landing page
+  hosts: all
+  become: true
+  tasks:
+    - name: Install required packages
+      apt:
+        name:
+          - nginx
+          - ca-certificates
+        state: present
+        update_cache: true
+
+    - name: Ensure nginx is enabled and running
+      service:
+        name: nginx
+        state: started
+        enabled: true
+
+    - name: Ensure asset directories exist
+      file:
+        path: "{{ item }}"
+        state: directory
+        owner: root
+        group: root
+        mode: "0755"
+      loop:
+        - /var/www/html/assets/css
+        - /var/www/html/assets/js
+        - /var/www/html/_logs
+
+    - name: Install site content
+      copy:
+        src: "{{ item.src }}"
+        dest: "{{ item.dest }}"
+        owner: root
+        group: root
+        mode: "0644"
+      loop:
+        - src: /vagrant/www/index.html
+          dest: /var/www/html/index.html
+        - src: /vagrant/www/assets/css/style.css
+          dest: /var/www/html/assets/css/style.css
+        - src: /vagrant/www/assets/js/main.js
+          dest: /var/www/html/assets/js/main.js
+
+    - name: Install nginx site config
+      copy:
+        src: /vagrant/provision/nginx-site.conf
+        dest: /etc/nginx/sites-available/default
+        owner: root
+        group: root
+        mode: "0644"
+      notify: Reload nginx
+
+    - name: Ensure nginx status log exists
+      file:
+        path: /var/www/html/_logs/nginx_status.log
+        state: touch
+        owner: root
+        group: root
+        mode: "0644"
+
+    - name: Validate nginx config
+      command: nginx -t
+      changed_when: false
+
+  handlers:
+    - name: Reload nginx
+      service:
+        name: nginx
+        state: reloaded
