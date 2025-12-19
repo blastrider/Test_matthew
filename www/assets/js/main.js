@@ -25,11 +25,23 @@
     var input = document.getElementById("pdf-input");
     var dropzone = document.querySelector("[data-dropzone]");
     var list = document.querySelector("[data-file-list]");
+    var uploadButton = document.querySelector('[data-action="upload-all"]');
     if (!input || !dropzone || !list) {
       return;
     }
 
     var files = [];
+    var isUploading = false;
+
+    function updateUploadButton() {
+      if (!uploadButton) {
+        return;
+      }
+      var hasPending = files.some(function (item) {
+        return item.status !== "done";
+      });
+      uploadButton.disabled = !files.length || isUploading || !hasPending;
+    }
 
     function renderList() {
       list.innerHTML = "";
@@ -38,6 +50,7 @@
         empty.className = "file-empty";
         empty.textContent = "Aucun fichier sélectionné.";
         list.appendChild(empty);
+        updateUploadButton();
         return;
       }
 
@@ -45,6 +58,15 @@
       ul.className = "file-items";
 
       files.forEach(function (item, index) {
+        var statusLabel = "En attente";
+        if (item.status === "uploading") {
+          statusLabel = "Envoi en cours";
+        } else if (item.status === "done") {
+          statusLabel = "Envoyé";
+        } else if (item.status === "error") {
+          statusLabel = item.error ? "Erreur: " + item.error : "Erreur";
+        }
+
         var li = document.createElement("li");
         li.className = "file-item";
 
@@ -58,6 +80,11 @@
         var meta = document.createElement("span");
         meta.className = "file-meta";
         meta.textContent = formatBytes(item.file.size);
+
+        var status = document.createElement("span");
+        status.className = "file-status";
+        status.setAttribute("data-state", item.status || "pending");
+        status.textContent = statusLabel;
 
         var actions = document.createElement("div");
         actions.className = "file-actions";
@@ -83,7 +110,17 @@
 
         info.appendChild(name);
         info.appendChild(meta);
+        info.appendChild(status);
         actions.appendChild(open);
+        if (item.serverUrl) {
+          var server = document.createElement("a");
+          server.className = "file-link";
+          server.href = item.serverUrl;
+          server.target = "_blank";
+          server.rel = "noopener";
+          server.textContent = "Serveur";
+          actions.appendChild(server);
+        }
         actions.appendChild(remove);
         li.appendChild(info);
         li.appendChild(actions);
@@ -91,6 +128,7 @@
       });
 
       list.appendChild(ul);
+      updateUploadButton();
     }
 
     function addFiles(fileList) {
@@ -101,7 +139,13 @@
         if (!isPdf) {
           return;
         }
-        files.push({ file: file, url: URL.createObjectURL(file) });
+        files.push({
+          file: file,
+          url: URL.createObjectURL(file),
+          status: "pending",
+          serverUrl: "",
+          error: "",
+        });
         added += 1;
       });
 
@@ -112,6 +156,74 @@
 
     function resetInput() {
       input.value = "";
+    }
+
+    function uploadFile(item) {
+      var payload = new FormData();
+      payload.append("pdf", item.file, item.file.name);
+
+      return fetch("/upload", {
+        method: "POST",
+        body: payload,
+      }).then(function (response) {
+        return response
+          .json()
+          .catch(function () {
+            return null;
+          })
+          .then(function (data) {
+            if (!response.ok || !data || !data.ok) {
+              var message = data && data.error ? data.error : "Erreur lors de l'upload.";
+              throw new Error(message);
+            }
+            return data;
+          });
+      });
+    }
+
+    function uploadAll() {
+      if (isUploading) {
+        return;
+      }
+      var queue = files.filter(function (item) {
+        return item.status !== "done";
+      });
+      if (!queue.length) {
+        updateUploadButton();
+        return;
+      }
+
+      isUploading = true;
+      updateUploadButton();
+
+      function next() {
+        var item = queue.shift();
+        if (!item) {
+          isUploading = false;
+          renderList();
+          return;
+        }
+
+        item.status = "uploading";
+        item.error = "";
+        renderList();
+
+        uploadFile(item)
+          .then(function (data) {
+            item.status = "done";
+            item.serverUrl = data.url || "";
+          })
+          .catch(function (error) {
+            item.status = "error";
+            item.error = error && error.message ? error.message : "Erreur";
+          })
+          .then(function () {
+            renderList();
+            next();
+          });
+      }
+
+      next();
     }
 
     input.addEventListener("change", function () {
@@ -141,6 +253,12 @@
         addFiles(event.dataTransfer.files);
       }
     });
+
+    if (uploadButton) {
+      uploadButton.addEventListener("click", function () {
+        uploadAll();
+      });
+    }
 
     renderList();
   }

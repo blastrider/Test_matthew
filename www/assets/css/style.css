@@ -225,6 +225,21 @@ h1{
   color:var(--muted);
   font-size:13px;
 }
+.uploader-actions{
+  margin-top:14px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  flex-wrap:wrap;
+}
+.uploader-actions .btn[disabled]{
+  opacity:.6;
+  cursor:not-allowed;
+}
+.uploader-hint{
+  color:var(--muted);
+  font-size:12.5px;
+}
 .file-items{
   list-style:none;
   margin:0;
@@ -255,6 +270,22 @@ h1{
 .file-meta{
   color:var(--muted);
   font-size:12px;
+}
+.file-status{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  font-size:12px;
+  color:var(--muted);
+}
+.file-status[data-state="done"]{
+  color:rgba(56,217,150,.9);
+}
+.file-status[data-state="error"]{
+  color:rgba(255,120,120,.9);
+}
+.file-status[data-state="uploading"]{
+  color:rgba(77,163,255,.9);
 }
 .file-actions{
   display:flex;

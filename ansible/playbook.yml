@@ -8,8 +8,15 @@
         name:
           - nginx
           - ca-certificates
+          - php8.2-fpm
         state: present
         update_cache: true
+
+    - name: Ensure php-fpm is enabled and running
+      service:
+        name: php8.2-fpm
+        state: started
+        enabled: true
 
     - name: Ensure nginx is enabled and running
       service:
@@ -28,6 +35,15 @@
         - /var/www/html/assets/css
         - /var/www/html/assets/js
         - /var/www/html/_logs
+        - /var/www/html/uploads
+
+    - name: Ensure upload directory is writable by php-fpm
+      file:
+        path: /var/www/html/uploads
+        state: directory
+        owner: www-data
+        group: www-data
+        mode: "0775"
 
     - name: Install site content
       copy:
@@ -43,6 +59,20 @@
           dest: /var/www/html/assets/css/style.css
         - src: /vagrant/www/assets/js/main.js
           dest: /var/www/html/assets/js/main.js
+        - src: /vagrant/www/upload.php
+          dest: /var/www/html/upload.php
+
+    - name: Set PHP upload limits
+      copy:
+        dest: /etc/php/8.2/fpm/conf.d/99-upload.ini
+        owner: root
+        group: root
+        mode: "0644"
+        content: |
+          upload_max_filesize = 10M
+          post_max_size = 10M
+          memory_limit = 128M
+      notify: Restart php-fpm
 
     - name: Install nginx site config
       copy:
@@ -70,3 +100,7 @@
       service:
         name: nginx
         state: reloaded
+    - name: Restart php-fpm
+      service:
+        name: php8.2-fpm
+        state: restarted

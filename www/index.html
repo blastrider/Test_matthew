@@ -96,7 +96,7 @@
       <div class="uploader-head">
         <div>
           <h2 id="uploader-title">Importer des PDFs</h2>
-          <p class="uploader-note">Les fichiers restent sur votre appareil (pas d'upload serveur).</p>
+          <p class="uploader-note">Les PDFs sont envoyés sur le serveur et stockés dans /uploads.</p>
         </div>
         <span class="badge">PDF uniquement</span>
       </div>
@@ -109,6 +109,10 @@
       </div>
       <div class="file-list" data-file-list>
         <p class="file-empty">Aucun fichier sélectionné.</p>
+      </div>
+      <div class="uploader-actions">
+        <button class="btn primary" type="button" data-action="upload-all">Envoyer sur le serveur</button>
+        <span class="uploader-hint">Limite 10 Mo / fichier</span>
       </div>
     </section>
 
