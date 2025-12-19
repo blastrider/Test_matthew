@@ -133,6 +133,10 @@
           dest: /var/www/html/assets/js/main.js
         - src: /vagrant/www/upload.php
           dest: /var/www/html/upload.php
+        - src: /vagrant/www/upload_list.php
+          dest: /var/www/html/upload_list.php
+        - src: /vagrant/www/upload_delete.php
+          dest: /var/www/html/upload_delete.php
       when: node_role == "nginx"
 
     - name: Set PHP upload limits

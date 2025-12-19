@@ -10,6 +10,23 @@
     });
   }
 
+  function fetchJson(url, options) {
+    return fetch(url, options || {}).then(function (response) {
+      return response
+        .json()
+        .catch(function () {
+          return null;
+        })
+        .then(function (data) {
+          if (!response.ok || !data || !data.ok) {
+            var message = data && data.error ? data.error : "Erreur serveur.";
+            throw new Error(message);
+          }
+          return data;
+        });
+    });
+  }
+
   function formatBytes(bytes) {
     if (!bytes) {
       return "0 B";
@@ -266,11 +283,158 @@
     renderList();
   }
 
+  function initServerDocuments() {
+    var list = document.querySelector("[data-server-list]");
+    var button = document.querySelector('[data-action="fetch-docs"]');
+    var status = document.querySelector("[data-server-status]");
+    if (!list || !button) {
+      return;
+    }
+
+    var isLoading = false;
+    var defaultLabel = button.textContent;
+
+    function setStatus(text) {
+      if (status) {
+        status.textContent = text;
+      }
+    }
+
+    function setLoading(active) {
+      isLoading = active;
+      button.disabled = active;
+      button.textContent = active ? "Chargement..." : defaultLabel;
+    }
+
+    function renderEmpty(message) {
+      list.innerHTML = "";
+      var empty = document.createElement("p");
+      empty.className = "file-empty";
+      empty.textContent = message;
+      list.appendChild(empty);
+    }
+
+    function renderList(items) {
+      list.innerHTML = "";
+      if (!items.length) {
+        renderEmpty("Aucun document sur le serveur.");
+        return;
+      }
+
+      var ul = document.createElement("ul");
+      ul.className = "file-items";
+
+      items.forEach(function (item) {
+        var li = document.createElement("li");
+        li.className = "file-item";
+
+        var info = document.createElement("div");
+        info.className = "file-info";
+
+        var name = document.createElement("span");
+        name.className = "file-name";
+        name.textContent = item.name;
+
+        var meta = document.createElement("span");
+        meta.className = "file-meta";
+
+        var dateText = "";
+        if (item.mtime) {
+          var date = new Date(item.mtime * 1000);
+          dateText = date.toLocaleString("fr-FR");
+        }
+        meta.textContent = dateText
+          ? formatBytes(item.size) + " • " + dateText
+          : formatBytes(item.size);
+
+        var actions = document.createElement("div");
+        actions.className = "file-actions";
+
+        var open = document.createElement("a");
+        open.className = "file-link";
+        open.href = new URL(item.url, window.location.origin).toString();
+        open.target = "_blank";
+        open.rel = "noopener";
+        open.textContent = "Ouvrir";
+
+        var remove = document.createElement("button");
+        remove.type = "button";
+        remove.className = "file-remove";
+        remove.textContent = "Supprimer";
+        remove.addEventListener("click", function () {
+          if (!confirm("Supprimer " + item.name + " ?")) {
+            return;
+          }
+          deleteDocument(item.name);
+        });
+
+        info.appendChild(name);
+        info.appendChild(meta);
+        actions.appendChild(open);
+        actions.appendChild(remove);
+        li.appendChild(info);
+        li.appendChild(actions);
+        ul.appendChild(li);
+      });
+
+      list.appendChild(ul);
+    }
+
+    function fetchDocuments() {
+      if (isLoading) {
+        return;
+      }
+      setLoading(true);
+      setStatus("Chargement en cours...");
+      var listUrl = window.location.origin + "/upload_list";
+      fetchJson(listUrl, { cache: "no-store" })
+        .then(function (data) {
+          renderList(data.items || []);
+          setStatus("Liste chargee.");
+        })
+        .catch(function (error) {
+          renderEmpty("Erreur lors du chargement.");
+          setStatus(error && error.message ? error.message : "Erreur lors du chargement.");
+        })
+        .finally(function () {
+          setLoading(false);
+        });
+    }
+
+    function deleteDocument(name) {
+      if (isLoading) {
+        return;
+      }
+      setLoading(true);
+      setStatus("Suppression en cours...");
+      var deleteUrl = window.location.origin + "/upload_delete";
+      fetchJson(deleteUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name: name }),
+      })
+        .then(function () {
+          fetchDocuments();
+        })
+        .catch(function (error) {
+          setStatus(error && error.message ? error.message : "Suppression impossible.");
+          setLoading(false);
+        });
+    }
+
+    button.addEventListener("click", function () {
+      fetchDocuments();
+    });
+  }
+
   function onReady() {
     var statusLink = document.querySelector('[data-action="status"]');
     var modal = document.getElementById("status-modal");
+    initPdfUploader();
+    initServerDocuments();
     if (!statusLink || !modal) {
-      initPdfUploader();
       return;
     }
 
@@ -350,7 +514,6 @@
       }
     });
 
-    initPdfUploader();
   }
 
   if (document.readyState === "loading") {

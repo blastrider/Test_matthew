@@ -116,6 +116,19 @@
       </div>
     </section>
 
+    <section class="panel server-docs" aria-labelledby="server-docs-title">
+      <div class="uploader-head">
+        <div>
+          <h2 id="server-docs-title">Documents sur le serveur</h2>
+          <p class="uploader-note" data-server-status>Utilisez le bouton pour charger la liste.</p>
+        </div>
+        <button class="btn" type="button" data-action="fetch-docs">Lister les documents</button>
+      </div>
+      <div class="file-list" data-server-list>
+        <p class="file-empty">Aucun document charge.</p>
+      </div>
+    </section>
+
     <footer>
       <div>Served by <b>Nginx</b> • Vagrant • Debian Bookworm</div>
       <div>Astuce: remappe le port host si besoin (ex: 8081)</div>

@@ -140,6 +140,10 @@ h1{
   transition: transform .12s ease, background .12s ease, border-color .12s ease;
   user-select:none;
 }
+.btn[disabled]{
+  opacity:.6;
+  cursor:not-allowed;
+}
 .btn:hover{transform: translateY(-1px); background:rgba(255,255,255,.09); border-color:rgba(255,255,255,.18)}
 .btn.primary{
   border-color: rgba(77,163,255,.45);
@@ -164,6 +168,9 @@ h1{
 .card p{margin:0; color:var(--muted); font-size:13.5px; line-height:1.45}
 
 .uploader{
+  margin-top:22px;
+}
+.server-docs{
   margin-top:22px;
 }
 .uploader-head{
