@@ -293,6 +293,7 @@
 
     var isLoading = false;
     var defaultLabel = button.textContent;
+    var serverItems = [];
 
     function setStatus(text) {
       if (status) {
@@ -380,8 +381,8 @@
       list.appendChild(ul);
     }
 
-    function fetchDocuments() {
-      if (isLoading) {
+    function fetchDocuments(force) {
+      if (isLoading && !force) {
         return;
       }
       setLoading(true);
@@ -389,7 +390,8 @@
       var listUrl = window.location.origin + "/upload_list";
       fetchJson(listUrl, { cache: "no-store" })
         .then(function (data) {
-          renderList(data.items || []);
+          serverItems = data.items || [];
+          renderList(serverItems);
           setStatus("Liste chargee.");
         })
         .catch(function (error) {
@@ -416,7 +418,12 @@
         body: JSON.stringify({ name: name }),
       })
         .then(function () {
-          fetchDocuments();
+          serverItems = serverItems.filter(function (item) {
+            return item.name !== name;
+          });
+          renderList(serverItems);
+          setStatus("Document supprime.");
+          setLoading(false);
         })
         .catch(function (error) {
           setStatus(error && error.message ? error.message : "Suppression impossible.");

@@ -7,6 +7,7 @@
     nfs_server_ip: 192.168.56.12
     nfs_allowed_subnet: 192.168.56.0/24
     nfs_export_path: /var/www/html/upload
+    www_data_uid: 33
   tasks:
     - name: Install base packages
       apt:
@@ -29,6 +30,15 @@
         name:
           - nfs-kernel-server
         state: present
+      when: node_role == "storage"
+
+    - name: Ensure www-data user exists on storage
+      user:
+        name: www-data
+        uid: "{{ www_data_uid }}"
+        group: www-data
+        system: true
+        create_home: false
       when: node_role == "storage"
 
     - name: Ensure php-fpm is enabled and running
@@ -113,7 +123,7 @@
         owner: root
         group: root
         mode: "0644"
-        content: "{{ nfs_export_path }} {{ nfs_allowed_subnet }}(rw,sync,no_subtree_check)"
+        content: "{{ nfs_export_path }} {{ nfs_allowed_subnet }}(rw,sync,no_subtree_check,all_squash,anonuid={{ www_data_uid }},anongid={{ www_data_uid }})"
       notify: Reload nfs exports
       when: node_role == "storage"
 
